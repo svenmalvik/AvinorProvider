@@ -10,18 +10,19 @@ import org.apache.http.impl.client.BasicResponseHandler;
 
 public class Avinor {
 
-	public String getData(HttpClient httpclient) {
-        String timeFromInHours = "1";
-		String timeToInHours = "7";
-		String airport = "OSL";
-		String lastUpdate = "2009-03-10T15:03:00";
-		HttpGet httpget = new HttpGet(
-				"http://flydata.avinor.no/XmlFeed.asp?TimeFrom="
-						+ timeFromInHours + "&TimeTo=" + timeToInHours
-						+ "&airport=" + airport + "&direction=D&lastUpdate="
-						+ lastUpdate); 
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
-        String responseBody = null;
+	private static final String URL_AVINOR = "http://flydata.avinor.no/XmlFeed.asp?";
+	public static Boolean ARRIVAL = Boolean.TRUE;
+	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
+
+	public static String getData(HttpClient httpclient, String airport) {
+		return getData(httpclient, airport, null);
+	}
+
+	public static String getData(HttpClient httpclient, String airport, Boolean isArrival) {
+		HttpGet httpget = new HttpGet(createUrl(airport, isArrival));
+
+		ResponseHandler<String> responseHandler = new BasicResponseHandler();
+		String responseBody = null;
 		try {
 			responseBody = httpclient.execute(httpget, responseHandler);
 		} catch (ClientProtocolException e) {
@@ -29,7 +30,15 @@ public class Avinor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return responseBody;
+	}
+
+	private static String createUrl(String airport, Boolean isArrival) {
+		String arrivalORdepature = "&direction=";
+		if (isArrival != null) {
+			arrivalORdepature += isArrival.booleanValue() ? "A" : "D";
+		}
+		return URL_AVINOR + "airport=" + airport + arrivalORdepature;
 	}
 }

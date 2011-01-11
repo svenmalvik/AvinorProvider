@@ -9,9 +9,7 @@ public class Main {
 
 	public static void main(String[] args) {
         HttpClient httpclient = new DefaultHttpClient();
-        Avinor avinor = new Avinor();
-        String responseBody = avinor.getData(httpclient);
-        System.out.println(responseBody);
+        System.out.println(Avinor.getData(httpclient, "OSL"));
 
         httpclient.getConnectionManager().shutdown();     
 	}
