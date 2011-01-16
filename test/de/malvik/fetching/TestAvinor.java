@@ -1,6 +1,9 @@
 package de.malvik.fetching;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import java.util.List;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -16,33 +19,18 @@ public class TestAvinor {
 	public void setupClass() {
 		httpclient = new DefaultHttpClient();
 	}
-
-	@Test
-	public void testOsloInfos() {
-        String responseBody = Avinor.getData(httpclient, "OSL");
-        assertNotNull(responseBody);
-        httpclient.getConnectionManager().shutdown(); 
-	}
 	
 	@Test
-	public void testOsloDepatures() {
-        String responseBody = Avinor.getData(httpclient, "OSL", Avinor.DEPATURE);
-        assertNotNull(responseBody);
-        httpclient.getConnectionManager().shutdown(); 
-	}
-	
-	@Test
-	public void testOsloArrivals() {
-        String responseBody = Avinor.getData(httpclient, "OSL", Avinor.ARRIVAL);
-        assertNotNull(responseBody);
-        httpclient.getConnectionManager().shutdown(); 
+	public void testOsloList() {
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
+		for (Avinor avinor : avinorList) {
+			assertEquals("OSL", avinor.airport);
+		}
 	}
 	
 	@After
 	public void teardownClass() {
 		httpclient.getConnectionManager().shutdown(); 
 	}
-	
-// * getData(Airport) * getData(Airport, Destination) * getData(Airport, isDepature) * getData(Airport, isDepature, Destination)
 	
 }

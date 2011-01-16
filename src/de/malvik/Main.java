@@ -3,13 +3,13 @@ package de.malvik;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import de.malvik.fetching.Avinor;
+import de.malvik.fetching.AvinorController;
 
 public class Main {
 
 	public static void main(String[] args) {
         HttpClient httpclient = new DefaultHttpClient();
-        System.out.println(Avinor.getData(httpclient, "OSL"));
+        System.out.println(AvinorController.fetch(httpclient, "OSL"));
 
         httpclient.getConnectionManager().shutdown();     
 	}
