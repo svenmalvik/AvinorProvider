@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -17,34 +18,53 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class AvinorController {
 
 	private static final String XPATH_AIRPORT = "//airport/@name";
 	private static Logger logger = Logger.getLogger(AvinorController.class.getName());
 	private static final String URL_AVINOR = "http://flydata.avinor.no/XmlFeed.asp?";
+	private static final String XPATH_LAST_UPDATE = "//airport/flights/@lastUpdate";
+	private static final String XPATH_FLIGHT = "//airport/flights/flight";
 	public static Boolean ARRIVAL = Boolean.TRUE;
 	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
 	private static XPath xPath = XPathFactory.newInstance().newXPath();
 
 	public static List<Avinor> getAirportPlan(HttpClient httpclient, String airport) {
-		List<Avinor> list = new ArrayList<Avinor>();
 		Document doc = getDocument(httpclient, airport);
-		boolean isValid = validateAirportPlan(doc, airport);
-		if (!isValid) {
-			return list;
-		}
+		return createAvinorList(doc, airport);
+	}
 
-		// NodeList nodes = (NodeList) result;
-		// for (int i = 0; i < nodes.getLength(); i++) {
-		// System.out.println(nodes.item(i).getNodeValue());
-		// }
+	private static List<Avinor> createAvinorList(Document doc, String airport) {
+		List<Avinor> list = new ArrayList<Avinor>();
+		if (!isValidAirportPlan(doc, airport)) {
+			String lastUpdate = extractString(doc, XPATH_LAST_UPDATE);
+			NodeList nodes = extractNodeset(doc, XPATH_FLIGHT);
+			
+			for (int i = 0; i < nodes.getLength(); i++) {
+				 Avinor avinor = new Avinor(airport);
+				 avinor.setLastUpdate(lastUpdate);
+				 Node node = nodes.item(i);
+				 // ... set rest
+				 list.add(avinor);
+			 }
+		}
 		return list;
 	}
 	
-	private static boolean validateAirportPlan(Document doc, String airport) {
+	private static NodeList extractNodeset(Document doc, String xpath) {
+		return (NodeList) extract(doc, XPathConstants.NODESET, xpath);
+	}
+
+	private static String extractString(Document doc, String xpath) {
+		return (String) extract(doc, XPathConstants.STRING, xpath);
+	}
+
+	private static boolean isValidAirportPlan(Document doc, String airport) {
 		boolean isValid = doc == null ? false : true;
-		String extractedAirport = extract(doc, XPATH_AIRPORT);
+		String extractedAirport = extractString(doc, XPATH_AIRPORT);
 		if (!extractedAirport.equals(airport)) {
 			isValid = false;
 			logger.log(Level.SEVERE, "Airport is " + extractedAirport + "Should be " + airport);
@@ -82,11 +102,11 @@ public class AvinorController {
 		return URL_AVINOR + "airport=" + airport + arrivalORdepature;
 	}
 
-	private static String extract(Document doc, String xpath) {
-		String result = "";
+	private static Object extract(Document doc, QName qname, String xpath) {
+		Object result = "";
 		try {
 			XPathExpression expr = xPath.compile(xpath);
-			result = (String) expr.evaluate(doc, XPathConstants.STRING);
+			result = expr.evaluate(doc, qname);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Failed extracting xpath:" + xpath, e);
 		}
