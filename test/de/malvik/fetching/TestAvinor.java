@@ -27,7 +27,7 @@ public class TestAvinor {
 		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
 		assertTrue("Empty list", avinorList.size() > 0);
 		for (Avinor avinor : avinorList) {
-			assertEquals("Wrong airport", "OSL", avinor.airport);
+			assertEquals("Wrong airport", "OSL", avinor.data4airport);
 			assertNotNull("No schedule time", avinor.lastUpdate);
 			Assert.assertNotNull("UniqueId is null", avinor.uniqueId);
 			assertNotNull("flightId is null", avinor.flightId);

@@ -39,19 +39,30 @@ public class AvinorController {
 
 	private static List<Avinor> createAvinorList(Document doc, String airport) {
 		List<Avinor> list = new ArrayList<Avinor>();
-		if (!isValidAirportPlan(doc, airport)) {
+		
+		if (isValidAirportPlan(doc, airport)) {
 			String lastUpdate = extractString(doc, XPATH_LAST_UPDATE);
 			NodeList nodes = extractNodeset(doc, XPATH_FLIGHT);
 			
 			for (int i = 0; i < nodes.getLength(); i++) {
-				 Avinor avinor = new Avinor(airport);
-				 avinor.setLastUpdate(lastUpdate);
-				 Node node = nodes.item(i);
-				 // ... set rest
-				 list.add(avinor);
+				Avinor avinor = createAvinor(nodes.item(i), airport, lastUpdate);
+				list.add(avinor);
 			 }
+			logger.log(Level.INFO, "Fetch data for airport <" + airport + "> DataSize is " + list.size());
 		}
 		return list;
+	}
+
+	private static Avinor createAvinor(Node node, String airport, String lastUpdate) {
+		Avinor avinor = new Avinor(airport);
+		avinor.setLastUpdate(lastUpdate);
+		avinor.uniqueId = node.getAttributes().item(0).getNodeValue();
+		NodeList children = node.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node child = children.item(i);
+			avinor.setDataEntity(child.getNodeName(), child.getTextContent());
+		}
+		return avinor;
 	}
 	
 	private static NodeList extractNodeset(Document doc, String xpath) {
