@@ -23,6 +23,7 @@ import org.w3c.dom.NodeList;
 
 public class AvinorController {
 
+	
 	private static final String XPATH_AIRPORT = "//airport/@name";
 	private static Logger logger = Logger.getLogger(AvinorController.class.getName());
 	private static final String URL_AVINOR = "http://flydata.avinor.no/XmlFeed.asp?";
@@ -52,11 +53,13 @@ public class AvinorController {
 		}
 		return list;
 	}
+	
+
 
 	private static Avinor createAvinor(Node node, String airport, String lastUpdate) {
 		Avinor avinor = new Avinor(airport);
 		avinor.setLastUpdate(lastUpdate);
-		avinor.uniqueId = node.getAttributes().item(0).getNodeValue();
+		avinor.map.put("uniqueId", node.getAttributes().item(0).getNodeValue());
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
@@ -99,10 +102,6 @@ public class AvinorController {
 
 	private static HttpResponse fetchAvinor(HttpClient httpclient, String airport) {
 		return fetch(httpclient, createUrl(airport, null));
-	}
-
-	private static HttpResponse fetchAvinor(HttpClient httpClient, String airport, Boolean isArrival) {
-		return fetch(httpClient, createUrl(airport, isArrival));
 	}
 
 	private static String createUrl(String airport, Boolean isArrival) {

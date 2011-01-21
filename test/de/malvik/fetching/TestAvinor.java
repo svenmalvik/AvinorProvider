@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,16 +25,23 @@ public class TestAvinor {
 	public void testOsloList() {
 		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
 		assertTrue("Empty list", avinorList.size() > 0);
-		for (Avinor avinor : avinorList) {
-			assertEquals("Wrong airport", "OSL", avinor.data4airport);
-			assertNotNull("No schedule time", avinor.lastUpdate);
-			Assert.assertNotNull("UniqueId is null", avinor.uniqueId);
-			assertNotNull("flightId is null", avinor.flightId);
-			assertNotNull("Airline is null", avinor.airline);
-			assertNotNull("Domestic is null", avinor.domestic);
-			assertNotNull("UniqueId is null", avinor.uniqueId);
-			assertNotNull("No schedule time", avinor.scheduleTime);
+		for (Avinor flight : avinorList) {
+			assertEquals("Wrong airport", "OSL", flight.map.get("data4airport"));
+			assertNotNull("No schedule time", flight.map.get("lastUpdate"));
+			assertNotNull("UniqueId is null", flight.map.get("uniqueId"));
+			assertNotNull("flightId is null", flight.map.get("flight_id"));
+			assertNotNull("Airline is null", flight.map.get("airline"));
+			assertNotNull("Domestic is null", flight.map.get("dom_int"));
+			assertNotNull("No schedule time", flight.map.get("schedule_time"));
 		}
+	}
+	
+	@Test
+	public void testAvinor2Json() {
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
+		String json = Avinor.toJson(avinorList);
+		assertNotNull(json);
+		assertTrue(json.length() > 0);
 	}
 	
 	@After
