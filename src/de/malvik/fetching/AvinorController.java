@@ -1,6 +1,10 @@
 package de.malvik.fetching;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -15,8 +19,15 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.BasicHttpContext;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,7 +43,8 @@ public class AvinorController {
 	public static Boolean ARRIVAL = Boolean.TRUE;
 	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
 	private static XPath xPath = XPathFactory.newInstance().newXPath();
-
+	public static String DB_SERVER = "http://localhost:5984/nortrafikk";
+	
 	public static List<Avinor> getAirportPlan(HttpClient httpclient, String airport) {
 		Document doc = getDocument(httpclient, airport);
 		return createAvinorList(doc, airport);
@@ -54,12 +66,10 @@ public class AvinorController {
 		return list;
 	}
 	
-
-
 	private static Avinor createAvinor(Node node, String airport, String lastUpdate) {
 		Avinor avinor = new Avinor(airport);
 		avinor.setLastUpdate(lastUpdate);
-		avinor.map.put("uniqueId", node.getAttributes().item(0).getNodeValue());
+		avinor.map.put("_id", "avinor_" + node.getAttributes().item(0).getNodeValue());
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
@@ -155,5 +165,61 @@ public class AvinorController {
 		if (statusCode != 200) {
 			logger.log(Level.WARNING, "StatusCode:" + statusCode);
 		}
+	}
+
+	public static void save(HttpClient httpclient, Avinor avinor) {
+		try {
+			AvinorController.save(httpclient, DB_SERVER, avinor.toJson());
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "MSG:" + e.getMessage(), e);
+		}
+	}
+	
+	private static HttpResponse save(HttpClient httpclient, String url, String json) throws ClientProtocolException, IOException {
+		StringEntity reqEntity = createEntity(json);
+		HttpUriRequest post = createPost(url, reqEntity);
+	    HttpResponse res = httpclient.execute( post, new BasicHttpContext() ); 
+	    // @TODO stupid, but comes later
+	    post.abort();
+	    return res;
+	}
+
+	private static HttpUriRequest createPost(String url, StringEntity reqEntity) {
+		HttpPost request = new HttpPost( url );
+		request.setEntity( reqEntity );
+		return request;
+	}
+
+	private static StringEntity createEntity(String json) throws UnsupportedEncodingException {
+		StringEntity reqEntity = new StringEntity( json );
+		reqEntity.setContentType("application/json");
+		reqEntity.setContentEncoding( "UTF-8" );
+		return reqEntity;
+	}
+
+	public static void saveOrUpdate(HttpClient httpclient, Avinor avinor)  {
+		try {
+			HttpGet get = new HttpGet(DB_SERVER + "/" + avinor.map.get("_id"));
+			HttpResponse res = httpclient.execute(get);
+			JSONObject jo = getJson(res);
+			avinor.map.put("_rev", jo.getString("_rev"));
+			// @TODO stupid, but comes later
+			get.abort();
+			save(httpclient, avinor);
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "MSG:" + e.getMessage(), e);
+		}
+	}
+
+	private static JSONObject getJson(HttpResponse res) throws IOException,
+			JSONException {
+		InputStream is = res.getEntity().getContent();
+		BufferedReader in = new BufferedReader(new InputStreamReader(is));
+		String line = "";
+		String json = "";
+		while ((line = in.readLine()) != null) {
+			json += line;
+		} 
+		return new JSONObject(json);
 	}
 }

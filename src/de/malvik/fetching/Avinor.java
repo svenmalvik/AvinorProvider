@@ -3,18 +3,16 @@ package de.malvik.fetching;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class Avinor {
 
 	private static Logger logger = Logger.getLogger(Avinor.class.getName());
-	public static SimpleDateFormat format = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss");
+	public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	public Map<String, String> map = new HashMap<String, String>();
 
 	public Avinor(String data4airport) {
@@ -47,11 +45,7 @@ public class Avinor {
 		}
 	}
 
-	public static String toJson(List<Avinor> avinorList) {
-		JSONArray json = new JSONArray();
-		for (Avinor flight : avinorList) {
-			json.put(flight.map);
-		}
-		return json.toString();
+	public String toJson() {
+		return new JSONObject(map).toString();
 	}
 }

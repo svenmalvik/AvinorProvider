@@ -4,12 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestAvinor {
@@ -21,6 +24,7 @@ public class TestAvinor {
 		httpclient = new DefaultHttpClient();
 	}
 	
+	@Ignore
 	@Test
 	public void testOsloList() {
 		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
@@ -37,11 +41,16 @@ public class TestAvinor {
 	}
 	
 	@Test
-	public void testAvinor2Json() {
+	public void testAvinor2Json() throws URISyntaxException, IOException, InterruptedException {
 		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
-		String json = Avinor.toJson(avinorList);
-		assertNotNull(json);
-		assertTrue(json.length() > 0);
+
+		for (Avinor avinor : avinorList) {
+			String json = avinor.toJson();
+			assertNotNull(json);
+			assertTrue(json.length() > 0);
+			
+			AvinorController.saveOrUpdate(httpclient, avinor);
+		}
 	}
 	
 	@After
