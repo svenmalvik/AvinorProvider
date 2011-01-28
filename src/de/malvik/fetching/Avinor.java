@@ -19,10 +19,10 @@ public class Avinor {
 		map.put("data4airport", data4airport);
 	}
 
-	private static Date format(String date) {
-		Date formatedDate = new Date();
+	private static long format(String date) {
+		long formatedDate = 0l;
 		try {
-			formatedDate = format.parse(date);
+			formatedDate = format.parse(date).getTime();
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "MSG:" + e.getMessage() + "--- Date:"
 					+ date, e);
@@ -31,12 +31,12 @@ public class Avinor {
 	}
 
 	public void setLastUpdate(String lastUpdate) {
-		map.put("lastUpdate", format(lastUpdate).toString());
+		map.put("lastUpdate", String.valueOf(format(lastUpdate)));
 	}
 
 	public void setDataEntity(String name, String value) {
 		if (name.equalsIgnoreCase("schedule_time")) {
-			map.put("schedule_time", format(value).toString());
+			map.put("schedule_time", String.valueOf(format(value)));
 			
 		} else if (name.equalsIgnoreCase("#text")) {
 		

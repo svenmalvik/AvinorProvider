@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -40,8 +42,24 @@ public class TestAvinor {
 		}
 	}
 	
+	@Ignore
 	@Test
-	public void testAvinor2Json() throws URISyntaxException, IOException, InterruptedException {
+	public void delete() throws ClientProtocolException, IOException, JSONException {
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
+		for (Avinor avinor : avinorList) {
+			AvinorController.delete(httpclient, avinor);
+		}
+	}
+	
+	@Ignore
+	@Test
+	public void deleteAll() throws ClientProtocolException, IOException, JSONException {
+		AvinorController.deleteAll(httpclient);
+	}
+	
+	//@Ignore
+	@Test
+	public void testAvinor2Json()  {
 		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
 
 		for (Avinor avinor : avinorList) {

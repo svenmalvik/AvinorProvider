@@ -21,11 +21,13 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.BasicHttpContext;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -179,6 +181,7 @@ public class AvinorController {
 		StringEntity reqEntity = createEntity(json);
 		HttpUriRequest post = createPost(url, reqEntity);
 	    HttpResponse res = httpclient.execute( post, new BasicHttpContext() ); 
+	    System.out.println(res.getStatusLine());
 	    // @TODO stupid, but comes later
 	    post.abort();
 	    return res;
@@ -199,27 +202,64 @@ public class AvinorController {
 
 	public static void saveOrUpdate(HttpClient httpclient, Avinor avinor)  {
 		try {
-			HttpGet get = new HttpGet(DB_SERVER + "/" + avinor.map.get("_id"));
-			HttpResponse res = httpclient.execute(get);
-			JSONObject jo = getJson(res);
-			avinor.map.put("_rev", jo.getString("_rev"));
-			// @TODO stupid, but comes later
-			get.abort();
+			get(httpclient, avinor);
 			save(httpclient, avinor);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "MSG:" + e.getMessage(), e);
 		}
 	}
 
+	private static void get(HttpClient httpclient, Avinor avinor)
+			throws IOException, ClientProtocolException, JSONException {
+		HttpGet get = new HttpGet(DB_SERVER + "/" + avinor.map.get("_id"));
+		HttpResponse res = httpclient.execute(get);
+		JSONObject jo = getJson(res);
+		if (jo.has("_rev")) {
+			avinor.map.put("_rev", jo.getString("_rev"));
+		}
+		// @TODO stupid, but comes later
+		get.abort();
+	}
+
 	private static JSONObject getJson(HttpResponse res) throws IOException,
 			JSONException {
+		String json = readContent(res); 
+		return new JSONObject(json);
+	}
+
+	private static String readContent(HttpResponse res) throws IOException {
 		InputStream is = res.getEntity().getContent();
 		BufferedReader in = new BufferedReader(new InputStreamReader(is));
 		String line = "";
 		String json = "";
 		while ((line = in.readLine()) != null) {
 			json += line;
-		} 
-		return new JSONObject(json);
+		}
+		return json;
+	}
+	
+	public static void deleteAll(HttpClient httpclient) throws ClientProtocolException, IOException, JSONException {
+		HttpGet get = new HttpGet(DB_SERVER + "/_all_docs");
+		HttpResponse res = httpclient.execute(get);
+		JSONObject json = new JSONObject(readContent(res));
+		JSONArray ja = new JSONArray(json.getString("rows"));
+		for (int i = 0; i < ja.length(); i++) {
+			JSONObject jo = ja.getJSONObject(i);
+			String id = jo.getString("id");
+			if (!id.startsWith("_design")) {
+				Avinor avinor = new Avinor("");
+				avinor.map.put("_id", id);
+				avinor.map.put("_rev", jo.getJSONObject("value").getString("rev"));
+				delete(httpclient, avinor);
+			}
+		}
+	}
+
+	public static void delete(HttpClient httpclient, Avinor avinor) throws ClientProtocolException, IOException, JSONException {
+		get(httpclient, avinor);
+		HttpDelete request = new HttpDelete( DB_SERVER + "/" + avinor.map.get("_id") + "?" + "rev=" + avinor.map.get("_rev") );
+	    HttpResponse res = httpclient.execute( request, new BasicHttpContext() ); 
+	    System.out.println(res.getStatusLine());
+	    request.abort();
 	}
 }
