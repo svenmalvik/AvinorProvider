@@ -26,38 +26,33 @@ public class TestAvinor {
 		httpclient = new DefaultHttpClient();
 	}
 	
-	@Ignore
 	@Test
 	public void testOsloList() {
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "TRD");
 		assertTrue("Empty list", avinorList.size() > 0);
 		for (Avinor flight : avinorList) {
-			assertEquals("Wrong airport", "OSL", flight.map.get("data4airport"));
-			assertNotNull("No schedule time", flight.map.get("lastUpdate"));
-			assertNotNull("UniqueId is null", flight.map.get("uniqueId"));
-			assertNotNull("flightId is null", flight.map.get("flight_id"));
-			assertNotNull("Airline is null", flight.map.get("airline"));
-			assertNotNull("Domestic is null", flight.map.get("dom_int"));
-			assertNotNull("No schedule time", flight.map.get("schedule_time"));
+			assertEquals("Wrong airport for: " + flight.toJson(), "TRD", flight.map.get("data4airport"));
+			assertNotNull("No schedule time for: " + flight.toJson(), flight.map.get("lastUpdate"));
+			assertNotNull("flightId is null for: " + flight.toJson(), flight.map.get("flight_id"));
+			assertNotNull("Airline is null for: " + flight.toJson(), flight.map.get("airline"));
+			assertNotNull("Domestic is null for: " + flight.toJson(), flight.map.get("dom_int"));
+			assertNotNull("No schedule time for: " + flight.toJson(), flight.map.get("schedule_time"));
 		}
 	}
 	
-	@Ignore
 	@Test
 	public void delete() throws ClientProtocolException, IOException, JSONException {
 		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
 		for (Avinor avinor : avinorList) {
-			AvinorController.delete(httpclient, avinor);
+			AvinorController.delete(httpclient, avinor.map.get("_id"));
 		}
 	}
 	
-	@Ignore
 	@Test
 	public void deleteAll() throws ClientProtocolException, IOException, JSONException {
 		AvinorController.deleteAll(httpclient);
 	}
 	
-	//@Ignore
 	@Test
 	public void testAvinor2Json()  {
 		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");

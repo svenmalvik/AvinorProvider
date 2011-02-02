@@ -169,9 +169,9 @@ public class AvinorController {
 		}
 	}
 
-	public static void save(HttpClient httpclient, Avinor avinor) {
+	public static void save(HttpClient httpclient, String json) {
 		try {
-			AvinorController.save(httpclient, DB_SERVER, avinor.toJson());
+			AvinorController.save(httpclient, DB_SERVER, json);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "MSG:" + e.getMessage(), e);
 		}
@@ -202,23 +202,29 @@ public class AvinorController {
 
 	public static void saveOrUpdate(HttpClient httpclient, Avinor avinor)  {
 		try {
-			get(httpclient, avinor);
-			save(httpclient, avinor);
+			String rev = readFromCouchdb(httpclient, avinor.map.get("_id"));
+			if (!rev.equalsIgnoreCase("")) {
+				avinor.map.put("_rev", rev);
+			}
+			save(httpclient, avinor.toJson());
+			
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "MSG:" + e.getMessage(), e);
 		}
 	}
 
-	private static void get(HttpClient httpclient, Avinor avinor)
+	private static String readFromCouchdb(HttpClient httpclient, String id)
 			throws IOException, ClientProtocolException, JSONException {
-		HttpGet get = new HttpGet(DB_SERVER + "/" + avinor.map.get("_id"));
+		String rev = "";
+		HttpGet get = new HttpGet(DB_SERVER + "/" + id);
 		HttpResponse res = httpclient.execute(get);
 		JSONObject jo = getJson(res);
 		if (jo.has("_rev")) {
-			avinor.map.put("_rev", jo.getString("_rev"));
+			rev = jo.getString("_rev");
 		}
 		// @TODO stupid, but comes later
 		get.abort();
+		return rev;
 	}
 
 	private static JSONObject getJson(HttpResponse res) throws IOException,
@@ -250,14 +256,14 @@ public class AvinorController {
 				Avinor avinor = new Avinor("");
 				avinor.map.put("_id", id);
 				avinor.map.put("_rev", jo.getJSONObject("value").getString("rev"));
-				delete(httpclient, avinor);
+				delete(httpclient, avinor.map.get("_id"));
 			}
 		}
 	}
 
-	public static void delete(HttpClient httpclient, Avinor avinor) throws ClientProtocolException, IOException, JSONException {
-		get(httpclient, avinor);
-		HttpDelete request = new HttpDelete( DB_SERVER + "/" + avinor.map.get("_id") + "?" + "rev=" + avinor.map.get("_rev") );
+	public static void delete(HttpClient httpclient, String id) throws ClientProtocolException, IOException, JSONException {
+		String rev = readFromCouchdb(httpclient, id);
+		HttpDelete request = new HttpDelete( DB_SERVER + "/" + id + "?" + "rev=" + rev );
 	    HttpResponse res = httpclient.execute( request, new BasicHttpContext() ); 
 	    System.out.println(res.getStatusLine());
 	    request.abort();
