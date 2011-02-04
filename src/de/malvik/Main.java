@@ -11,12 +11,28 @@ public class Main {
 
 	public static void main(String[] args) {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, args[0]);
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, argsAirport(args), argsArrival(args));
 
 		for (Avinor avinor : avinorList) {
 			save2couchdb(args, httpclient, avinor);
 			verboseIfConfigured(args, avinor);
 		}  
+	}
+
+	private static Boolean argsArrival(String[] args) {
+		Boolean arrival = null;
+		if (args.length < 4) {
+		} else if (args[3].equalsIgnoreCase("A")) {
+			arrival = new Boolean(true);
+			
+		} else if (args[3].equalsIgnoreCase("D")) {
+			arrival = new Boolean(false);
+		}
+		return arrival;
+	}
+
+	private static String argsAirport(String[] args) {
+		return args[0];
 	}
 
 	private static void save2couchdb(String[] args, DefaultHttpClient httpclient, Avinor avinor) {

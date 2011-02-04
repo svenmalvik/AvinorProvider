@@ -21,8 +21,8 @@ public class AvinorController {
 	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
 	
 	
-	public static List<Avinor> getAirportPlan(HttpClient httpclient, String airport) {
-		Document doc = DataController.getDocument(httpclient, createUrl(airport, null), airport);
+	public static List<Avinor> getAirportPlan(HttpClient httpclient, String airport, Boolean arrival) {
+		Document doc = DataController.getDocument(httpclient, createUrl(airport, arrival), airport);
 		return createAvinorList(doc, airport);
 	}
 
