@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
@@ -14,7 +13,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestAvinor {
@@ -44,13 +42,13 @@ public class TestAvinor {
 	public void delete() throws ClientProtocolException, IOException, JSONException {
 		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL");
 		for (Avinor avinor : avinorList) {
-			AvinorController.delete(httpclient, avinor.map.get("_id"));
+			DataController.delete(httpclient, avinor.map.get("_id"));
 		}
 	}
 	
 	@Test
 	public void deleteAll() throws ClientProtocolException, IOException, JSONException {
-		AvinorController.deleteAll(httpclient);
+		DataController.deleteAll(httpclient);
 	}
 	
 	@Test
@@ -70,5 +68,4 @@ public class TestAvinor {
 	public void teardownClass() {
 		httpclient.getConnectionManager().shutdown(); 
 	}
-	
 }
