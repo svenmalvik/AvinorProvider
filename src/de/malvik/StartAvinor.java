@@ -70,12 +70,12 @@ public class StartAvinor {
         
         lvOptions.addOption(lvHilfe);
         lvOptions.addOption(lvArrival);
-        lvOptions.addOption(lvFormat);
-        lvOptions.addOption(lvOutput);
-        lvOptions.addOption(lvLocation);
-        lvOptions.addOption(lvFlightId);
-        lvOptions.addOption(lvCountEntries);
-        lvOptions.addOption(lvLastUpdated);
+//        lvOptions.addOption(lvFormat);
+//        lvOptions.addOption(lvOutput);
+//        lvOptions.addOption(lvLocation);
+//        lvOptions.addOption(lvFlightId);
+//        lvOptions.addOption(lvCountEntries);
+//        lvOptions.addOption(lvLastUpdated);
         lvOptions.addOption(lvAirport);
 		return lvOptions;
 	}
