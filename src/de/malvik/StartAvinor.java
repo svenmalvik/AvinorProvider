@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.RuntimeErrorException;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -17,6 +19,9 @@ import de.malvik.fetching.Avinor;
 import de.malvik.fetching.AvinorController;
 
 public class StartAvinor {
+	private static final String DEFAULT_AIRPORT = "OSL";
+	private static final String OUTPUT_CONSOLE = "console";
+	private static final String OUTPUT_COUCHDB = "couchdb";
 	private static Logger logger = Logger.getLogger(StartAvinor.class.getName());
 
 	public static void main(String[] args) {
@@ -32,9 +37,9 @@ public class StartAvinor {
         		process(lvCmd);
         	}
 
-        } catch (ParseException pvException) {
+        } catch (Exception e) {
             printHelp(lvOptions);
-            logger.log(Level.SEVERE, "Parse error: " + pvException.getMessage());
+            logger.log(Level.SEVERE, "Error: " + e.getMessage());
         }
 	}
 
@@ -45,11 +50,58 @@ public class StartAvinor {
 
 	private static void process(CommandLine lvCmd) {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, lvCmd.getOptionValue("c"), null);
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, lvCmd.getOptionValue("c", DEFAULT_AIRPORT), getArrival(lvCmd));
 
 		for (Avinor avinor : avinorList) {
-			AvinorController.saveOrUpdate(httpclient, avinor);
+			processOutput(lvCmd, httpclient, avinor);
 		}  
+	}
+
+	private static void processOutput(CommandLine lvCmd, DefaultHttpClient httpclient, Avinor avinor) {
+		boolean print2console = true;
+		boolean save2couchdb = true;
+		
+		if (hasOutputOption(lvCmd)) {
+			String output = lvCmd.getOptionValue("o", "");
+			
+			if (output.equalsIgnoreCase(OUTPUT_COUCHDB)) {
+				save2couchdb = true;
+				print2console = false;
+				
+			} else if (output.equalsIgnoreCase(OUTPUT_CONSOLE)) {
+				print2console = true;
+				save2couchdb = false;
+			
+			} else {
+				throw new RuntimeException("Output <" + output + "> does not exist");
+			}			
+		}
+		
+		if (save2couchdb) {
+			AvinorController.saveOrUpdate(httpclient, avinor);
+		}
+		
+		if (print2console) {
+			System.out.println(avinor.toJson());
+		}		
+	}
+
+	private static boolean hasOutputOption(CommandLine lvCmd) {
+		return lvCmd.hasOption('o');
+	}
+
+	private static Boolean getArrival(CommandLine lvCmd) {
+		Boolean isArrival = null;
+		if (lvCmd.hasOption('a')) {
+			String arrival = lvCmd.getOptionValue('a');
+			if (arrival.equalsIgnoreCase("A")) {
+				isArrival = new Boolean(true);
+			
+			} else if (arrival.equalsIgnoreCase("D")) {
+				isArrival = new Boolean(false);
+			}
+		}
+		return isArrival;
 	}
 
 	private static boolean hasHelpOption(CommandLine lvCmd) {
@@ -59,24 +111,15 @@ public class StartAvinor {
 	private static Options setOptions() {
 		Options lvOptions = new Options();
         Option lvHilfe = new Option("h", "help", false, "Prints all possible parameters.");
-        Option lvFormat = new Option("f", "format", true, "Output formats."); lvFormat.setArgName("plain|csv|xml|json");
         Option lvArrival = new Option("a", "arrival", true, "When nothing is set it takes both. (A)rrival, (D)epature"); lvArrival.setArgName("A|D");
-        Option lvOutput = new Option("o", "output", true, "When couchdb is set the format is json by default plus the other you set."); lvOutput.setArgName("console|file|couchdb");
-        Option lvLocation = new Option("l", "location", true, "CouchDB url when format is couchdb."); lvLocation.setArgName("filePath|couchDBurl");
+        Option lvOutput = new Option("o", "output", true, "Prints the json result to the console or saves in couchdb. If not set it takes both."); lvOutput.setArgName(OUTPUT_CONSOLE + "|" + OUTPUT_COUCHDB);
         Option lvAirport = new Option("c", "airport", true, "<OSL> for <Oslo, Gardermoen>."); lvAirport.setArgName("airportShortName");
-        Option lvFlightId = new Option("i", "flightId", true, "Flight number to get data of (SK5479)."); lvFlightId.setArgName("flightId");
-        Option lvCountEntries = new Option("n", "countEntries", true, "Limits the output by setting a number of max entries to display."); lvCountEntries.setArgName("number");
-        Option lvLastUpdated = new Option("u", "lastUpdated", true, "Avoid traffic when running the programm frequently by getting only updates."); lvLastUpdated.setArgName("10m|2h|3d");
         
         lvOptions.addOption(lvHilfe);
         lvOptions.addOption(lvArrival);
-//        lvOptions.addOption(lvFormat);
-//        lvOptions.addOption(lvOutput);
-//        lvOptions.addOption(lvLocation);
-//        lvOptions.addOption(lvFlightId);
-//        lvOptions.addOption(lvCountEntries);
-//        lvOptions.addOption(lvLastUpdated);
+        lvOptions.addOption(lvOutput);
         lvOptions.addOption(lvAirport);
+
 		return lvOptions;
 	}
 }
