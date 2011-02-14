@@ -1,7 +1,6 @@
 package de.malvik.fetching;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -12,7 +11,7 @@ import org.json.JSONObject;
 public class Avinor {
 
 	private static Logger logger = Logger.getLogger(Avinor.class.getName());
-	public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	public Map<String, String> map = new HashMap<String, String>();
 
 	public Avinor(String data4airport) {
@@ -22,7 +21,7 @@ public class Avinor {
 	private static long format(String date) {
 		long formatedDate = 0l;
 		try {
-			formatedDate = format.parse(date).getTime();
+			formatedDate = DATE_FORMAT.parse(date).getTime();
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "MSG:" + e.getMessage() + "--- Date:"
 					+ date, e);

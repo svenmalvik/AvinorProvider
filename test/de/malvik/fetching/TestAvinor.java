@@ -26,7 +26,7 @@ public class TestAvinor {
 	
 	@Test
 	public void testOsloList() {
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "TRD", null);
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "TRD", null, null);
 		assertTrue("Empty list", avinorList.size() > 0);
 		for (Avinor flight : avinorList) {
 			assertEquals("Wrong airport for: " + flight.toJson(), "TRD", flight.map.get("data4airport"));
@@ -40,7 +40,7 @@ public class TestAvinor {
 	
 	@Test
 	public void delete() throws ClientProtocolException, IOException, JSONException {
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null);
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);
 		for (Avinor avinor : avinorList) {
 			DataController.delete(httpclient, avinor.map.get("_id"));
 		}
@@ -53,7 +53,7 @@ public class TestAvinor {
 	
 	@Test
 	public void testAvinor2Json()  {
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null);
+		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);
 
 		for (Avinor avinor : avinorList) {
 			String json = avinor.toJson();

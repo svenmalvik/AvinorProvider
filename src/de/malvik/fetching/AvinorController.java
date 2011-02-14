@@ -1,6 +1,7 @@
 package de.malvik.fetching;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,8 +22,8 @@ public class AvinorController {
 	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
 	
 	
-	public static List<Avinor> getAirportPlan(HttpClient httpclient, String airport, Boolean arrival) {
-		Document doc = DataController.getDocument(httpclient, createUrl(airport, arrival), airport);
+	public static List<Avinor> getAirportPlan(HttpClient httpclient, String airport, Boolean arrival, Date lastUpdated) {
+		Document doc = DataController.getDocument(httpclient, createUrl(airport, arrival, lastUpdated), airport);
 		return createAvinorList(doc, airport);
 	}
 
@@ -64,12 +65,20 @@ public class AvinorController {
 		return isValid;
 	}
 
-	private static String createUrl(String airport, Boolean isArrival) {
+	private static String createUrl(String airport, Boolean isArrival, Date lastUpdated) {
+		return URL_AVINOR + "airport=" + airport + formatArrival(isArrival) + formatLastUpdated(lastUpdated);
+	}
+
+	private static String formatArrival(Boolean isArrival) {
 		String arrivalORdepature = "&direction=";
 		if (isArrival != null) {
 			arrivalORdepature += isArrival.booleanValue() ? "A" : "D";
 		}
-		return URL_AVINOR + "airport=" + airport + arrivalORdepature;
+		return arrivalORdepature;
+	}
+
+	private static String formatLastUpdated(Date lastUpdated) {
+		return lastUpdated == null ? "" : "&lastUpdate=" + Avinor.DATE_FORMAT.format(lastUpdated);
 	}
 
 	public static void saveOrUpdate(HttpClient httpclient, Avinor avinor)  {
