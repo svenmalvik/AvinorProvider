@@ -31,7 +31,7 @@ public class TestAvinor {
 	@Test
 	public void testAirports() {
 		Map<String, Airport> airports = AvinorController.getAirports(httpclient);
-		Assert.assertTrue("Airports not found!", airports.size() == 0);
+		Assert.assertTrue("Airports not found!", airports.size() > 0);
 	}
 	
 	@Ignore
