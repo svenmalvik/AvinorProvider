@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -29,6 +31,7 @@ public class TestAvinor {
 	@Test
 	public void testAirports() {
 		Map<String, Airport> airports = AvinorController.getAirports(httpclient);
+		Assert.assertTrue("Airports not found!", airports.size() == 0);
 	}
 	
 	@Ignore
