@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -13,6 +14,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestAvinor {
@@ -24,6 +26,12 @@ public class TestAvinor {
 		httpclient = new DefaultHttpClient();
 	}
 	
+	@Test
+	public void testAirports() {
+		Map<String, Airport> airports = AvinorController.getAirports(httpclient);
+	}
+	
+	@Ignore
 	@Test
 	public void testOsloList() {
 		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, "TRD", null, null);
@@ -38,6 +46,7 @@ public class TestAvinor {
 		}
 	}
 	
+	@Ignore
 	@Test
 	public void delete() throws ClientProtocolException, IOException, JSONException {
 		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);
@@ -46,11 +55,13 @@ public class TestAvinor {
 		}
 	}
 	
+	@Ignore
 	@Test
 	public void deleteAll() throws ClientProtocolException, IOException, JSONException {
 		DataController.deleteAll(httpclient);
 	}
 	
+	@Ignore
 	@Test
 	public void testAvinor2Json()  {
 		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);

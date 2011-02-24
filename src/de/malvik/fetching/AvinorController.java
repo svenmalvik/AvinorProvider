@@ -2,7 +2,9 @@ package de.malvik.fetching;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -92,5 +94,10 @@ public class AvinorController {
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "MSG:" + e.getMessage(), e);
 		}
+	}
+
+	public static Map<String, Airport> getAirports(HttpClient httpclient) {
+		Map<String, Airport> airports = new HashMap<String, Airport>();
+		return airports;
 	}
 }
