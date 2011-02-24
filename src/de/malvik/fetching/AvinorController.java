@@ -22,20 +22,20 @@ public class AvinorController {
 	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
 	
 	
-	public static List<Avinor> getAirportPlan(HttpClient httpclient, String airport, Boolean arrival, Date lastUpdated) {
+	public static List<Flight> getAirportPlan(HttpClient httpclient, String airport, Boolean arrival, Date lastUpdated) {
 		Document doc = DataController.getDocument(httpclient, createUrl(airport, arrival, lastUpdated), airport);
 		return createAvinorList(doc, airport);
 	}
 
-	private static List<Avinor> createAvinorList(Document doc, String airport) {
-		List<Avinor> list = new ArrayList<Avinor>();
+	private static List<Flight> createAvinorList(Document doc, String airport) {
+		List<Flight> list = new ArrayList<Flight>();
 		
 		if (isValidAirportPlan(doc, airport)) {
 			String lastUpdate = DataController.extractString(doc, XPATH_LAST_UPDATE);
 			NodeList nodes = DataController.extractNodeset(doc, XPATH_FLIGHT);
 			
 			for (int i = 0; i < nodes.getLength(); i++) {
-				Avinor avinor = createAvinor(nodes.item(i), airport, lastUpdate);
+				Flight avinor = createAvinor(nodes.item(i), airport, lastUpdate);
 				list.add(avinor);
 			 }
 			logger.log(Level.INFO, "Fetch data for airport <" + airport + "> DataSize is " + list.size());
@@ -43,8 +43,8 @@ public class AvinorController {
 		return list;
 	}
 	
-	private static Avinor createAvinor(Node node, String airport, String lastUpdate) {
-		Avinor avinor = new Avinor(airport);
+	private static Flight createAvinor(Node node, String airport, String lastUpdate) {
+		Flight avinor = new Flight(airport);
 		avinor.setLastUpdate(lastUpdate);
 		avinor.map.put("_id", "avinor_" + node.getAttributes().item(0).getNodeValue());
 		NodeList children = node.getChildNodes();
@@ -78,10 +78,10 @@ public class AvinorController {
 	}
 
 	private static String formatLastUpdated(Date lastUpdated) {
-		return lastUpdated == null ? "" : "&lastUpdate=" + Avinor.DATE_FORMAT.format(lastUpdated);
+		return lastUpdated == null ? "" : "&lastUpdate=" + Flight.DATE_FORMAT.format(lastUpdated);
 	}
 
-	public static void saveOrUpdate(HttpClient httpclient, Avinor avinor)  {
+	public static void saveOrUpdate(HttpClient httpclient, Flight avinor)  {
 		try {
 			String rev = DataController.readFromCouchdb(httpclient, avinor.map.get("_id"));
 			if (!rev.equalsIgnoreCase("")) {

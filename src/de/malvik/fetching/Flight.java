@@ -8,13 +8,13 @@ import java.util.logging.Logger;
 
 import org.json.JSONObject;
 
-public class Avinor {
+public class Flight {
 
-	private static Logger logger = Logger.getLogger(Avinor.class.getName());
+	private static Logger logger = Logger.getLogger(Flight.class.getName());
 	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	public Map<String, String> map = new HashMap<String, String>();
 
-	public Avinor(String data4airport) {
+	public Flight(String data4airport) {
 		map.put("data4airport", data4airport);
 	}
 

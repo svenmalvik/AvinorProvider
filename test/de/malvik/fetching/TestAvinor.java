@@ -26,9 +26,9 @@ public class TestAvinor {
 	
 	@Test
 	public void testOsloList() {
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "TRD", null, null);
+		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, "TRD", null, null);
 		assertTrue("Empty list", avinorList.size() > 0);
-		for (Avinor flight : avinorList) {
+		for (Flight flight : avinorList) {
 			assertEquals("Wrong airport for: " + flight.toJson(), "TRD", flight.map.get("data4airport"));
 			assertNotNull("No schedule time for: " + flight.toJson(), flight.map.get("lastUpdate"));
 			assertNotNull("flightId is null for: " + flight.toJson(), flight.map.get("flight_id"));
@@ -40,8 +40,8 @@ public class TestAvinor {
 	
 	@Test
 	public void delete() throws ClientProtocolException, IOException, JSONException {
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);
-		for (Avinor avinor : avinorList) {
+		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);
+		for (Flight avinor : avinorList) {
 			DataController.delete(httpclient, avinor.map.get("_id"));
 		}
 	}
@@ -53,9 +53,9 @@ public class TestAvinor {
 	
 	@Test
 	public void testAvinor2Json()  {
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);
+		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);
 
-		for (Avinor avinor : avinorList) {
+		for (Flight avinor : avinorList) {
 			String json = avinor.toJson();
 			assertNotNull(json);
 			assertTrue(json.length() > 0);

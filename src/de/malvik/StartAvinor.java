@@ -15,7 +15,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import de.malvik.fetching.Avinor;
+import de.malvik.fetching.Flight;
 import de.malvik.fetching.AvinorController;
 
 public class StartAvinor {
@@ -50,9 +50,9 @@ public class StartAvinor {
 
 	private static void process(CommandLine lvCmd) {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		List<Avinor> avinorList = AvinorController.getAirportPlan(httpclient, lvCmd.getOptionValue("c", DEFAULT_AIRPORT), getArrival(lvCmd), getLastUpdated(lvCmd));
+		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, lvCmd.getOptionValue("c", DEFAULT_AIRPORT), getArrival(lvCmd), getLastUpdated(lvCmd));
 
-		for (Avinor avinor : avinorList) {
+		for (Flight avinor : avinorList) {
 			processOutput(lvCmd, httpclient, avinor);
 		}  
 	}
@@ -91,7 +91,7 @@ public class StartAvinor {
 		return lvCmd.hasOption('u');
 	}
 
-	private static void processOutput(CommandLine lvCmd, DefaultHttpClient httpclient, Avinor avinor) {
+	private static void processOutput(CommandLine lvCmd, DefaultHttpClient httpclient, Flight avinor) {
 		boolean print2console = true;
 		boolean save2couchdb = true;
 		
