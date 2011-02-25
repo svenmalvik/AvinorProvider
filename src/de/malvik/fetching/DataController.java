@@ -19,12 +19,15 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.util.EncodingUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -162,14 +165,15 @@ public class DataController {
 
 	private static HttpUriRequest createPost(String url, StringEntity reqEntity) {
 		HttpPost request = new HttpPost( url );
-		request.setEntity( reqEntity );
+		request.setEntity(reqEntity);
 		return request;
 	}
 
 	private static StringEntity createEntity(String json) throws UnsupportedEncodingException {
-		StringEntity reqEntity = new StringEntity( json );
+		String encodedJson = new String(json.getBytes("ISO-8859-1"), "UTF-8");
+		StringEntity reqEntity = new StringEntity(encodedJson);
+		//Widerøe problem
 		reqEntity.setContentType("application/json");
-		reqEntity.setContentEncoding( "UTF-8" );
 		return reqEntity;
 	}
 }
