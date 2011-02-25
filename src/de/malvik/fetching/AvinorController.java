@@ -24,10 +24,13 @@ public class AvinorController {
 	private static final String XPATH_AIRPORT_NAMES = "//airportNames/airportName";
 	private static final String URL_AIRLINES = "http://flydata.avinor.no/airlineNames.asp";
 	private static final String XPATH_AIRLINES_NAMES = "//airlineNames/airlineName";
+	private static final String URL_STATUSTEXTS = "http://flydata.avinor.no/flightStatuses.asp";
+	private static final String XPATH_STATUSTEXTS = "//flightStatuses/flightStatus";
 	public static Boolean ARRIVAL = Boolean.TRUE;
 	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
 	public static Map<String, Airport> AIRPORTS = new HashMap<String, Airport>();
 	public static Map<String, Airline> AIRLINES = new HashMap<String, Airline>();
+	public static Map<String, String> STATUSTEXTS = new HashMap<String, String>();
 	
 	public static List<Flight> getAirportPlan(HttpClient httpclient, String airport, Boolean arrival, Date lastUpdated) {
 		Document doc = DataController.getDocument(httpclient, createUrl(airport, arrival, lastUpdated));
@@ -56,8 +59,7 @@ public class AvinorController {
 		flight.map.put("_id", "avinor_" + node.getAttributes().item(0).getNodeValue());
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
-			Node child = children.item(i);
-			flight.setDataEntity(child.getNodeName(), child.getTextContent());
+			flight.setDataEntity(children.item(i));
 		}
 		return flight;
 	}
@@ -111,7 +113,7 @@ public class AvinorController {
 				String airportShortName = airportNameNode.getAttributes().item(0).getNodeValue();
 				String airportName = airportNameNode.getAttributes().item(1).getNodeValue();
 				
-				if (validateAirportName(airportShortName, airportName)) {
+				if (validateName(airportShortName, airportName)) {
 					AIRPORTS.put(airportShortName, new Airport(airportShortName, airportName));
 					logger.log(Level.INFO, "Fetched airportName <" + airportShortName + "> =  " + airportName);
 					
@@ -124,18 +126,18 @@ public class AvinorController {
 		return AIRPORTS;
 	}
 
-	private static boolean validateAirportName(String airportShortName, String airportName) {
+	private static boolean validateName(String shortName, String longName) {
 		boolean hasValidName = true;
-		if (airportShortName == null || airportShortName.length() == 0 ) {
+		if (shortName == null || shortName.length() == 0 ) {
 			hasValidName = false;
 		}
-		if (airportName == null || airportName.length() == 0 ) {
+		if (longName == null || longName.length() == 0 ) {
 			hasValidName = false;
 		}
 		return hasValidName;
 	}
 	
-	public static Map<String, Airport> getAirlines(HttpClient httpclient) {
+	public static Map<String, Airline> getAirlines(HttpClient httpclient) {
 		if (AIRLINES.size() == 0) {
 			Document doc = DataController.getDocument(httpclient, URL_AIRLINES);
 			NodeList airlineNames = DataController.extractNodeset(doc, XPATH_AIRLINES_NAMES);
@@ -145,7 +147,7 @@ public class AvinorController {
 				String airlineShortName = airlineNameNode.getAttributes().item(0).getNodeValue();
 				String airlineName = airlineNameNode.getAttributes().item(1).getNodeValue();
 				
-				if (validateAirportName(airlineShortName, airlineName)) {
+				if (validateName(airlineShortName, airlineName)) {
 					AIRLINES.put(airlineShortName, new Airline(airlineShortName, airlineName));
 					logger.log(Level.INFO, "Fetched airlineName <" + airlineShortName + "> =  " + airlineName);
 					
@@ -155,6 +157,30 @@ public class AvinorController {
 			 }
 		}
 
-		return AIRPORTS;
+		return AIRLINES;
 	}	
+
+	public static Map<String, String> getStatusTexts(HttpClient httpclient) {
+		if (STATUSTEXTS.size() == 0) {
+			Document doc = DataController.getDocument(httpclient, URL_STATUSTEXTS);
+			NodeList statuses = DataController.extractNodeset(doc, XPATH_STATUSTEXTS);
+			
+			for (int i = 0; i < statuses.getLength(); i++) {
+				Node statusNode = statuses.item(i);
+				String statusShortName = statusNode.getAttributes().item(0).getNodeValue();
+				String statusName = statusNode.getAttributes().item(1).getNodeValue();
+				
+				if (validateName(statusShortName, statusName)) {
+					STATUSTEXTS.put(statusShortName, statusName);
+					logger.log(Level.INFO, "Fetched statuses <" + statusShortName + "> =  " + statusName);
+					
+				} else {
+					logger.log(Level.WARNING, "Fetching status did not work well here");
+				}
+			 }
+		}
+
+		return STATUSTEXTS;
+	}	
+
 }

@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONObject;
+import org.w3c.dom.Node;
 
 public class Flight {
 
@@ -32,7 +33,10 @@ public class Flight {
 		map.put("lastUpdate", String.valueOf(format(lastUpdate)));
 	}
 
-	public void setDataEntity(String name, String value) {
+	public void setDataEntity(Node entry) {
+		String name = entry.getNodeName();
+		String value = entry.getTextContent();
+		
 		if (name.equalsIgnoreCase("schedule_time")) {
 			map.put("schedule_time", String.valueOf(format(value)));
 			
@@ -43,6 +47,15 @@ public class Flight {
 			
 		} else if (name.equalsIgnoreCase("airline")) {
 			setAirlineName(name, value);
+			
+		} else if (name.equalsIgnoreCase("status")) {
+			String code = entry.getAttributes().item(0).getNodeValue();
+			String time = "";
+			if (entry.getAttributes().getLength() > 1) {
+				time = ": " + entry.getAttributes().item(1).getNodeValue();
+			}
+			value = AvinorController.STATUSTEXTS.get(code) + time;
+			map.put(name, value);
 			
 		} else {
 			map.put(name, value);

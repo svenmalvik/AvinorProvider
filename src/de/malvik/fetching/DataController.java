@@ -80,7 +80,7 @@ public class DataController {
 		String rev = DataController.readFromCouchdb(httpclient, id);
 		HttpDelete request = new HttpDelete( DB_SERVER + "/" + id + "?" + "rev=" + rev );
 	    HttpResponse res = httpclient.execute( request, new BasicHttpContext() ); 
-	    System.out.println(res.getStatusLine());
+	    validateResponse(res, "delete id " + id);
 	    request.abort();
 	}
 	
@@ -118,10 +118,10 @@ public class DataController {
 		return inputStream;
 	}
 
-	public static void validateResponse(HttpResponse response) {
+	public static void validateResponse(HttpResponse response, String msg) {
 		int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode != 200) {
-			logger.log(Level.WARNING, "StatusCode:" + statusCode);
+		if (statusCode != 200 && statusCode != 201) {
+			logger.log(Level.WARNING, "Code: " + statusCode + " Statusline: " + response.getStatusLine() + " Msg: " + msg);
 		}
 	}
 	
@@ -146,7 +146,7 @@ public class DataController {
 	
 	public static Document getDocument(HttpClient httpclient, String url) {
 		HttpResponse response = httpGet(httpclient, url);
-		DataController.validateResponse(response);
+		DataController.validateResponse(response, url);
 		InputStream inputStream = DataController.getContentStream(response.getEntity());
 		return DataController.getDocument(inputStream);
 	}
@@ -155,8 +155,7 @@ public class DataController {
 		StringEntity reqEntity = createEntity(json);
 		HttpUriRequest post = createPost(DataController.DB_SERVER, reqEntity);
 	    HttpResponse res = httpclient.execute( post, new BasicHttpContext() ); 
-	    System.out.println(res.getStatusLine());
-	    // @TODO stupid, but comes later
+	    validateResponse(res, json);
 	    post.abort();
 	    return res;
 	}
