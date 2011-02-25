@@ -51,6 +51,7 @@ public class StartAvinor {
 	private static void process(CommandLine lvCmd) {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		AvinorController.getAirports(httpclient);
+		AvinorController.getAirlines(httpclient);
 		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, lvCmd.getOptionValue("c", DEFAULT_AIRPORT), getArrival(lvCmd), getLastUpdated(lvCmd));
 
 		for (Flight avinor : avinorList) {

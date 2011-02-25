@@ -41,8 +41,20 @@ public class Flight {
 		} else if (name.equalsIgnoreCase("airport")) {
 			setAirportName(name, value);
 			
+		} else if (name.equalsIgnoreCase("airline")) {
+			setAirlineName(name, value);
+			
 		} else {
 			map.put(name, value);
+		}
+	}
+	
+	private void setAirlineName(String name, String value) {
+		if (AvinorController.AIRLINES.size() == 0) {
+			logger.log(Level.SEVERE, "No airlines found. Please retrieve them first!");
+			
+		} else {
+			map.put(name, AvinorController.AIRLINES.get(value).airlineName);
 		}
 	}
 

@@ -22,10 +22,12 @@ public class AvinorController {
 	private static final String XPATH_LAST_UPDATE = "//airport/flights/@lastUpdate";
 	private static final String XPATH_FLIGHT = "//airport/flights/flight";
 	private static final String XPATH_AIRPORT_NAMES = "//airportNames/airportName";
+	private static final String URL_AIRLINES = "http://flydata.avinor.no/airlineNames.asp";
+	private static final String XPATH_AIRLINES_NAMES = "//airlineNames/airlineName";
 	public static Boolean ARRIVAL = Boolean.TRUE;
 	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
 	public static Map<String, Airport> AIRPORTS = new HashMap<String, Airport>();
-	
+	public static Map<String, Airline> AIRLINES = new HashMap<String, Airline>();
 	
 	public static List<Flight> getAirportPlan(HttpClient httpclient, String airport, Boolean arrival, Date lastUpdated) {
 		Document doc = DataController.getDocument(httpclient, createUrl(airport, arrival, lastUpdated));
@@ -97,7 +99,7 @@ public class AvinorController {
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "MSG:" + e.getMessage(), e);
 		}
-	}Map<String, Airport> airports = new HashMap<String, Airport>();
+	}
 
 	public static Map<String, Airport> getAirports(HttpClient httpclient) {
 		if (AIRPORTS.size() == 0) {
@@ -132,4 +134,27 @@ public class AvinorController {
 		}
 		return hasValidName;
 	}
+	
+	public static Map<String, Airport> getAirlines(HttpClient httpclient) {
+		if (AIRLINES.size() == 0) {
+			Document doc = DataController.getDocument(httpclient, URL_AIRLINES);
+			NodeList airlineNames = DataController.extractNodeset(doc, XPATH_AIRLINES_NAMES);
+			
+			for (int i = 0; i < airlineNames.getLength(); i++) {
+				Node airlineNameNode = airlineNames.item(i);
+				String airlineShortName = airlineNameNode.getAttributes().item(0).getNodeValue();
+				String airlineName = airlineNameNode.getAttributes().item(1).getNodeValue();
+				
+				if (validateAirportName(airlineShortName, airlineName)) {
+					AIRLINES.put(airlineShortName, new Airline(airlineShortName, airlineName));
+					logger.log(Level.INFO, "Fetched airlineName <" + airlineShortName + "> =  " + airlineName);
+					
+				} else {
+					logger.log(Level.WARNING, "Fetching airlineNameShort did not work well here");
+				}
+			 }
+		}
+
+		return AIRPORTS;
+	}	
 }
