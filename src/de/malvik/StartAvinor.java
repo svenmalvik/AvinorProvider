@@ -112,7 +112,7 @@ public class StartAvinor {
 		}
 		
 		if (save2couchdb) {
-			AvinorController.saveOrUpdate(httpclient, avinor);
+			AvinorController.saveOrUpdateFlight(httpclient, avinor);
 		}
 		
 		if (print2console) {

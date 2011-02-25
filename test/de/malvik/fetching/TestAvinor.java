@@ -28,6 +28,7 @@ public class TestAvinor {
 		httpclient = new DefaultHttpClient();
 	}
 	
+	@Ignore
 	@Test
 	public void testAirports() {
 		Map<String, Airport> airports = AvinorController.getAirports(httpclient);
@@ -66,7 +67,7 @@ public class TestAvinor {
 	
 	@Ignore
 	@Test
-	public void testAvinor2Json()  {
+	public void testAirportPlan2Json()  {
 		List<Flight> avinorList = AvinorController.getAirportPlan(httpclient, "OSL", null, null);
 
 		for (Flight avinor : avinorList) {
@@ -74,7 +75,7 @@ public class TestAvinor {
 			assertNotNull(json);
 			assertTrue(json.length() > 0);
 			
-			AvinorController.saveOrUpdate(httpclient, avinor);
+			AvinorController.saveOrUpdateFlight(httpclient, avinor);
 		}
 	}
 	

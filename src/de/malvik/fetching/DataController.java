@@ -144,7 +144,7 @@ public class DataController {
 		return (String) extract(doc, XPathConstants.STRING, xpath);
 	}
 	
-	public static Document getDocument(HttpClient httpclient, String url, String airport) {
+	public static Document getDocument(HttpClient httpclient, String url) {
 		HttpResponse response = httpGet(httpclient, url);
 		DataController.validateResponse(response);
 		InputStream inputStream = DataController.getContentStream(response.getEntity());
