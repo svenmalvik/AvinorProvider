@@ -24,6 +24,7 @@ public class AvinorController {
 	private static final String XPATH_AIRPORT_NAMES = "//airportNames/airportName";
 	public static Boolean ARRIVAL = Boolean.TRUE;
 	public static Boolean DEPATURE = Boolean.valueOf(!ARRIVAL.booleanValue());
+	public static Map<String, Airport> AIRPORTS = new HashMap<String, Airport>();
 	
 	
 	public static List<Flight> getAirportPlan(HttpClient httpclient, String airport, Boolean arrival, Date lastUpdated) {
@@ -68,7 +69,7 @@ public class AvinorController {
 		}
 		return isValid;
 	}
-
+	
 	private static String createUrl(String airport, Boolean isArrival, Date lastUpdated) {
 		return URL_FLIGHTS + "airport=" + airport + formatArrival(isArrival) + formatLastUpdated(lastUpdated);
 	}
@@ -96,28 +97,29 @@ public class AvinorController {
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "MSG:" + e.getMessage(), e);
 		}
-	}
+	}Map<String, Airport> airports = new HashMap<String, Airport>();
 
 	public static Map<String, Airport> getAirports(HttpClient httpclient) {
-		Map<String, Airport> airports = new HashMap<String, Airport>();
-		Document doc = DataController.getDocument(httpclient, URL_AIRPORTS);
-		NodeList airportNames = DataController.extractNodeset(doc, XPATH_AIRPORT_NAMES);
-		
-		for (int i = 0; i < airportNames.getLength(); i++) {
-			Node airportNameNode = airportNames.item(i);
-			String airportShortName = airportNameNode.getAttributes().item(0).getNodeValue();
-			String airportName = airportNameNode.getAttributes().item(1).getNodeValue();
+		if (AIRPORTS.size() == 0) {
+			Document doc = DataController.getDocument(httpclient, URL_AIRPORTS);
+			NodeList airportNames = DataController.extractNodeset(doc, XPATH_AIRPORT_NAMES);
 			
-			if (validateAirportName(airportShortName, airportName)) {
-				airports.put(airportShortName, new Airport(airportShortName, airportName));
-				logger.log(Level.INFO, "Fetched airportName <" + airportShortName + "> =  " + airportName);
+			for (int i = 0; i < airportNames.getLength(); i++) {
+				Node airportNameNode = airportNames.item(i);
+				String airportShortName = airportNameNode.getAttributes().item(0).getNodeValue();
+				String airportName = airportNameNode.getAttributes().item(1).getNodeValue();
 				
-			} else {
-				logger.log(Level.WARNING, "Fetching airportNameShort did not work well here");
-			}
-		 }
+				if (validateAirportName(airportShortName, airportName)) {
+					AIRPORTS.put(airportShortName, new Airport(airportShortName, airportName));
+					logger.log(Level.INFO, "Fetched airportName <" + airportShortName + "> =  " + airportName);
+					
+				} else {
+					logger.log(Level.WARNING, "Fetching airportNameShort did not work well here");
+				}
+			 }
+		}
 
-		return airports;
+		return AIRPORTS;
 	}
 
 	private static boolean validateAirportName(String airportShortName, String airportName) {

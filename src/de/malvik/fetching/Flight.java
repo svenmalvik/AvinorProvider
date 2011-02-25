@@ -23,8 +23,7 @@ public class Flight {
 		try {
 			formatedDate = DATE_FORMAT.parse(date).getTime();
 		} catch (Exception e) {
-			logger.log(Level.WARNING, "MSG:" + e.getMessage() + "--- Date:"
-					+ date, e);
+			logger.log(Level.WARNING, "MSG:" + e.getMessage() + "--- Date:" + date, e);
 		}
 		return formatedDate;
 	}
@@ -39,8 +38,20 @@ public class Flight {
 			
 		} else if (name.equalsIgnoreCase("#text")) {
 		
+		} else if (name.equalsIgnoreCase("airport")) {
+			setAirportName(name, value);
+			
 		} else {
 			map.put(name, value);
+		}
+	}
+
+	private void setAirportName(String name, String value) {
+		if (AvinorController.AIRPORTS.size() == 0) {
+			logger.log(Level.SEVERE, "No airports found. Please retrieve them first!");
+			
+		} else {
+			map.put(name, AvinorController.AIRPORTS.get(value).airportName);
 		}
 	}
 
