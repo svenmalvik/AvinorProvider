@@ -59,7 +59,6 @@ public class TestAvinor {
 		}
 	}
 	
-	@Ignore
 	@Test
 	public void deleteAll() throws ClientProtocolException, IOException, JSONException {
 		DataController.deleteAll(httpclient);

@@ -1,8 +1,10 @@
 package de.malvik.fetching;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +40,7 @@ public class Flight {
 		String value = entry.getTextContent();
 		
 		if (name.equalsIgnoreCase("schedule_time")) {
-			map.put("schedule_time", String.valueOf(format(value)));
+			setTime(name, value);
 			
 		} else if (name.equalsIgnoreCase("#text")) {
 		
@@ -52,7 +54,12 @@ public class Flight {
 			String code = entry.getAttributes().item(0).getNodeValue();
 			String time = "";
 			if (entry.getAttributes().getLength() > 1) {
-				time = ": " + entry.getAttributes().item(1).getNodeValue();
+				time = entry.getAttributes().item(1).getNodeValue();
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(format(time));
+				cal.add(Calendar.HOUR, 1);
+				SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+				time = ": " + String.valueOf(df.format(cal.getTime()));
 			}
 			value = AvinorController.STATUSTEXTS.get(code) + time;
 			map.put(name, value);
@@ -60,6 +67,13 @@ public class Flight {
 		} else {
 			map.put(name, value);
 		}
+	}
+
+	private void setTime(String name, String value) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(format(value));
+		cal.add(Calendar.HOUR, 1);
+		map.put(name, String.valueOf(cal.getTimeInMillis()));
 	}
 	
 	private void setAirlineName(String name, String value) {
